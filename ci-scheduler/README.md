@@ -69,11 +69,11 @@ For example, `omni-ci.yaml` calls `test-asr-ci.yaml`:
 
 ```text
 omni-ci::preflight
-  -> omni-ci::setup
-  -> omni-ci::pr-test                         (reusable workflow aggregate)
-  -> omni-ci::asr-ci                          (reusable workflow aggregate)
-       -> ...::stage-1-multi-speaker
-       -> ...::stage-2-seedtts
+  depends on: omni-ci::setup
+  depends on: omni-ci::pr-test                (reusable workflow aggregate)
+  depends on: omni-ci::asr-ci                 (reusable workflow aggregate)
+    contains: ...::stage-1-multi-speaker
+    contains: ...::stage-2-seedtts
 ```
 
 Reusable calls are virtual aggregate nodes. Caller dependencies are attached to
@@ -169,10 +169,10 @@ runner labels, commands, secrets, or checkout revisions.
 ## Queue Lifecycle
 
 ```text
-pending -> reserved -> dispatched -> running
-pending/reserved/dispatched/running -> cancelled | stale
-running -> passed | failed | timed_out
-pending -> skipped
+Normal lifecycle: pending, reserved, dispatched, running
+Cancellation lifecycle: pending/reserved/dispatched/running may become cancelled or stale
+Terminal lifecycle: running may become passed, failed, or timed_out
+Skip lifecycle: pending may become skipped
 ```
 
 Dispatch flow:
@@ -249,4 +249,3 @@ the same `GITHUB_WEBHOOK_SECRET` in GitHub and the service environment.
 4. Disable the legacy GPU triggers only after parity and capacity checks pass.
 5. Route `/rerun-failed-ci` through the scheduler and enable
   `SCHEDULER_RERUN_ENABLED`.
-
